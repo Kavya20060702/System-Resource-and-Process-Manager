@@ -1,0 +1,9 @@
+.metadata/
+*.log
+.DS_Store
+node_modules/
+target/
+.classpath
+.project
+.settings/
+*.class

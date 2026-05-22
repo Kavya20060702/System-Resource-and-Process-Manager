@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartOS Monitor</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">SMART<span class="accent">OS</span> MONITOR</span>
+    </div>
+    <div class="header-info">
+      <span id="hostname">LOADING...</span>
+      <span class="sep">|</span>
+      <span id="local-ip">---.---.---.---</span>
+      <span class="sep">|</span>
+      <span id="clock">00:00:00</span>
+    </div>
+    <div class="status-dot"><span class="dot pulse"></span> LIVE</div>
+  </header>
+
+  <!-- NAV TABS -->
+  <nav class="tabs">
+    <button class="tab active" onclick="showTab('dashboard')">⬡ Dashboard</button>
+    <button class="tab" onclick="showTab('processes')">⬡ Processes</button>
+    <button class="tab" onclick="showTab('network')">⬡ Network</button>
+    <button class="tab" onclick="showTab('scheduler')">⬡ CPU Scheduler</button>
+    <button class="tab" onclick="showTab('history')">⬡ History</button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 1: DASHBOARD (OS + DBMS)           -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="tab-dashboard" class="tab-content active">
+
+    <!-- Metric Cards Row -->
+    <div class="cards-row">
+      <div class="metric-card" id="card-cpu">
+        <div class="card-label">CPU USAGE</div>
+        <div class="card-value" id="cpu-val">--%</div>
+        <div class="card-sub" id="cpu-cores">-- cores</div>
+        <div class="bar-wrap"><div class="bar" id="cpu-bar"></div></div>
+        <div class="card-tag">OS › Scheduling</div>
+      </div>
+
+      <div class="metric-card" id="card-mem">
+        <div class="card-label">MEMORY (RAM)</div>
+        <div class="card-value" id="mem-val">--%</div>
+        <div class="card-sub" id="mem-detail">-- / -- GB</div>
+        <div class="bar-wrap"><div class="bar" id="mem-bar"></div></div>
+        <div class="card-tag">OS › Memory Mgmt</div>
+      </div>
+
+      <div class="metric-card" id="card-disk">
+        <div class="card-label">DISK USAGE</div>
+        <div class="card-value" id="disk-val">--%</div>
+        <div class="card-sub" id="disk-detail">-- / -- GB</div>
+        <div class="bar-wrap"><div class="bar" id="disk-bar"></div></div>
+        <div class="card-tag">OS › File System</div>
+      </div>
+
+      <div class="metric-card" id="card-net">
+        <div class="card-label">NETWORK I/O</div>
+        <div class="card-value" id="net-conn">-- conn</div>
+        <div class="card-sub" id="net-detail">↑ -- ↓ --</div>
+        <div class="bar-wrap"><div class="bar" id="net-bar"></div></div>
+        <div class="card-tag">CN › TCP/IP</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">CPU USAGE — LIVE (last 30 readings)</div>
+        <canvas id="cpuChart" height="100"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">MEMORY USAGE — LIVE</div>
+        <canvas id="memChart" height="100"></canvas>
+      </div>
+    </div>
+
+    <!-- Per-Core CPU -->
+    <div class="chart-card full-width" id="cores-section">
+      <div class="chart-title">PER-CORE CPU USAGE <span class="tag">OS › Process Affinity</span></div>
+      <div id="cores-grid" class="cores-grid"></div>
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="chart-card full-width" id="alerts-section">
+      <div class="chart-title">SYSTEM ALERTS <span class="tag">OS + DBMS › Threshold Events</span></div>
+      <div id="alerts-list">No active alerts</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 2: PROCESSES (OS MODULE)           -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="tab-processes" class="tab-content">
+    <div class="chart-card full-width">
+      <div class="chart-title">
+        PROCESS LIST
+        <span class="tag">OS › Process Management</span>
+        <button class="btn-refresh" onclick="loadProcesses()">↻ REFRESH</button>
+      </div>
+      <table id="process-table" class="data-table">
+        <thead>
+          <tr>
+            <th>PID</th><th>NAME</th><th>CPU%</th><th>MEM (MB)</th>
+            <th>THREADS</th><th>STATE</th><th>USER</th><th>PRIORITY</th>
+          </tr>
+        </thead>
+        <tbody id="process-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 3: NETWORK (CN MODULE)             -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="tab-network" class="tab-content">
+    <div class="cards-row">
+      <div class="metric-card">
+        <div class="card-label">HOSTNAME</div>
+        <div class="card-value small" id="net-hostname">---</div>
+        <div class="card-tag">CN › DNS</div>
+      </div>
+      <div class="metric-card">
+        <div class="card-label">LOCAL IP</div>
+        <div class="card-value small" id="net-ip">---</div>
+        <div class="card-tag">CN › IPv4 Layer</div>
+      </div>
+      <div class="metric-card">
+        <div class="card-label">ACTIVE CONNECTIONS</div>
+        <div class="card-value" id="net-active">--</div>
+        <div class="card-tag">CN › TCP Established</div>
+      </div>
+      <div class="metric-card">
+        <div class="card-label">TOTAL CONNECTIONS</div>
+        <div class="card-value" id="net-total">--</div>
+        <div class="card-tag">CN › Socket Count</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card full-width">
+        <div class="chart-title">NETWORK INTERFACES <span class="tag">CN › Data Link Layer</span></div>
+        <table class="data-table">
+          <thead>
+            <tr><th>INTERFACE</th><th>IPv4</th><th>MAC</th><th>BYTES SENT</th><th>BYTES RECV</th></tr>
+          </thead>
+          <tbody id="net-interfaces"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-card full-width">
+      <div class="chart-title">
+        OPEN PORTS / CONNECTIONS
+        <span class="tag">CN › Transport Layer</span>
+        <button class="btn-refresh" onclick="loadPorts()">↻ SCAN</button>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>LOCAL PORT</th><th>REMOTE ADDRESS</th><th>REMOTE PORT</th><th>STATE</th><th>PROTOCOL</th><th>PID</th></tr>
+        </thead>
+        <tbody id="ports-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 4: CPU SCHEDULER SIMULATOR (OS)    -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="tab-scheduler" class="tab-content">
+    <div class="chart-card full-width">
+      <div class="chart-title">CPU SCHEDULING SIMULATOR <span class="tag">OS › FCFS · SJF · Round Robin</span></div>
+
+      <!-- Algorithm Selection -->
+      <div class="scheduler-controls">
+        <div class="control-group">
+          <label>ALGORITHM</label>
+          <select id="algo-select">
+            <option value="fcfs">FCFS — First Come First Served</option>
+            <option value="sjf">SJF — Shortest Job First</option>
+            <option value="rr">Round Robin</option>
+          </select>
+        </div>
+        <div class="control-group" id="quantum-group">
+          <label>TIME QUANTUM</label>
+          <input type="number" id="quantum-input" value="2" min="1" max="10"/>
+        </div>
+        <button class="btn-simulate" onclick="runSimulation()">▶ SIMULATE</button>
+      </div>
+
+      <!-- Process Input Table -->
+      <div class="process-input-section">
+        <div class="chart-title small">INPUT PROCESSES</div>
+        <table class="data-table" id="input-table">
+          <thead>
+            <tr><th>PROCESS ID</th><th>ARRIVAL TIME</th><th>BURST TIME</th><th></th></tr>
+          </thead>
+          <tbody id="input-tbody">
+            <tr>
+              <td><input class="cell-input" value="P1"/></td>
+              <td><input class="cell-input" type="number" value="0"/></td>
+              <td><input class="cell-input" type="number" value="4"/></td>
+              <td><button class="btn-del" onclick="removeRow(this)">✕</button></td>
+            </tr>
+            <tr>
+              <td><input class="cell-input" value="P2"/></td>
+              <td><input class="cell-input" type="number" value="1"/></td>
+              <td><input class="cell-input" type="number" value="3"/></td>
+              <td><button class="btn-del" onclick="removeRow(this)">✕</button></td>
+            </tr>
+            <tr>
+              <td><input class="cell-input" value="P3"/></td>
+              <td><input class="cell-input" type="number" value="2"/></td>
+              <td><input class="cell-input" type="number" value="1"/></td>
+              <td><button class="btn-del" onclick="removeRow(this)">✕</button></td>
+            </tr>
+            <tr>
+              <td><input class="cell-input" value="P4"/></td>
+              <td><input class="cell-input" type="number" value="3"/></td>
+              <td><input class="cell-input" type="number" value="5"/></td>
+              <td><button class="btn-del" onclick="removeRow(this)">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn-add" onclick="addProcessRow()">+ ADD PROCESS</button>
+      </div>
+
+      <!-- Gantt Chart Output -->
+      <div id="gantt-section" style="display:none">
+        <div class="chart-title small">GANTT CHART</div>
+        <div id="gantt-chart" class="gantt-container"></div>
+
+        <div class="chart-title small">PROCESS STATISTICS</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>PROCESS</th><th>ARRIVAL</th><th>BURST</th><th>FINISH</th><th>WAITING TIME</th><th>TURNAROUND</th></tr>
+          </thead>
+          <tbody id="sched-stats-tbody"></tbody>
+        </table>
+
+        <div class="sched-summary" id="sched-summary"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TAB 5: HISTORY (DBMS MODULE)           -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="tab-history" class="tab-content">
+    <div class="cards-row">
+      <div class="metric-card">
+        <div class="card-label">AVG CPU (24h)</div>
+        <div class="card-value" id="hist-cpu24">--%</div>
+        <div class="card-tag">DBMS › AVG Query</div>
+      </div>
+      <div class="metric-card">
+        <div class="card-label">AVG CPU (7d)</div>
+        <div class="card-value" id="hist-cpu7d">--%</div>
+        <div class="card-tag">DBMS › Time-Range Query</div>
+      </div>
+      <div class="metric-card">
+        <div class="card-label">HIGH CPU EVENTS</div>
+        <div class="card-value" id="hist-events">--</div>
+        <div class="card-tag">DBMS › COUNT Filter</div>
+      </div>
+      <div class="metric-card">
+        <div class="card-label">PEAK RAM (24h)</div>
+        <div class="card-value small" id="hist-peak-mem">-- GB</div>
+        <div class="card-tag">DBMS › MAX Query</div>
+      </div>
+    </div>
+
+    <div class="chart-card full-width">
+      <div class="chart-title">RECENT SNAPSHOTS <span class="tag">DBMS › Stored Records</span></div>
+      <table class="data-table">
+        <thead>
+          <tr><th>TIMESTAMP</th><th>CPU%</th><th>MEM USED</th><th>CONNECTIONS</th><th>HOST</th></tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+      <div class="dbms-note">
+        💾 Records auto-saved every 30 seconds via <code>@Scheduled</code> Spring service → MySQL <code>system_snapshots</code> table
+      </div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

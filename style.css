@@ -5,20 +5,25 @@
    ═══════════════════════════════════════════ */
 
 :root {
-  --bg: #080c10;
-  --surface: #0d1117;
-  --surface2: #131920;
-  --border: #1e2d3a;
-  --accent: #00ff88;
-  --accent2: #00ccff;
-  --warn: #ffaa00;
-  --danger: #ff3355;
-  --text: #c8d8e8;
-  --text-dim: #4a6070;
+  --bg: #0a0f1c;
+  --surface: #111827;
+  --surface2: #1a2332;
+  --border: #2a3a52;
+
+  --accent: #4adeff;
+  --accent2: #8b5cf6;
+
+  --warn: #f59e0b;
+  --danger: #ef4444;
+
+  --text: #e6edf7;
+  --text-dim: #8aa0b8;
+
   --mono: 'Share Tech Mono', monospace;
   --sans: 'Rajdhani', sans-serif;
-  --glow: 0 0 12px rgba(0,255,136,0.25);
-  --glow2: 0 0 12px rgba(0,204,255,0.2);
+
+  --glow: 0 0 14px rgba(74, 222, 255, 0.35);
+  --glow2: 0 0 14px rgba(139, 92, 246, 0.3);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

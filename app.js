@@ -109,19 +109,113 @@ const memChart = new Chart(document.getElementById('memChart'), {
 // ─────────────────────────────────────────
 async function refreshDashboard() {
   try {
-    const res = await fetch(`${API}/system/overview`);
-    const data = await res.json();
+    const [cpuRes, memRes, diskRes, netRes] = await Promise.all([
+      fetch(`${API}/cpu`),
+      fetch(`${API}/memory`),
+      fetch(`${API}/disk`),
+      fetch(`${API}/network`)
+    ]);
 
-    updateCpuCard(data.cpu);
-    updateMemCard(data.memory);
-    updateDiskCard(data.disks);
-    updateNetCard(data.network);
-    updateCharts(data.cpu.usagePercent, data.memory.usagePercent);
-    updateCores(data.cpu.perCoreUsage);
+    const cpu  = await cpuRes.json();
+    const mem  = await memRes.json();
+    const disk = await diskRes.json();
+    const net  = await netRes.json();
 
+    updateCpuCard(cpu);
+    updateMemCard(mem);
+    updateDiskCard(disk);
+    updateNetCard(net);
+    updateCharts(cpu.usagePercent, mem.usagePercent);
+    updateCores(cpu.perCoreUsage);
+    loadAlerts(); 
   } catch (err) {
-    console.warn('Backend not reachable — showing mock data for development');
+    console.warn('Error fetching dashboard:', err);
     showMockData();
+  }
+}
+async function loadAlerts() {
+  try {
+    const res = await fetch(`${API}/alerts`);
+    const alerts = await res.json();
+
+    // Only show unresolved alerts
+    const active = alerts.filter(a => a.resolved === false);
+    const list = document.getElementById('alerts-list');
+
+    if (!active.length) {
+      list.innerHTML = '<div style="color:var(--text-dim)">No active alerts</div>';
+      return;
+    }
+
+    list.innerHTML = active.map(a => `
+      <div class="alert-item ${a.severity === 'CRITICAL' ? 'critical' : ''}">
+        <strong>${a.alertType}</strong> — ${a.message}
+        <span style="color:var(--text-dim); font-size:11px; margin-left:10px">
+          ${a.createdAt?.replace('T',' ').substring(0,19)}
+        </span>
+        <button onclick="resolveAlert(${a.id})" 
+          style="float:right; background:transparent; border:1px solid var(--border); 
+                 color:var(--text-dim); font-size:10px; padding:2px 8px; cursor:pointer;">
+          RESOLVE
+        </button>
+      </div>
+    `).join('');
+  } catch(e) {
+    console.warn('Alerts unavailable');
+  }
+}
+
+async function resolveAlert(id) {
+  try {
+    const res = await fetch(`${API}/alerts/${id}/resolve`, { method: 'PUT' });
+    const result = await res.json();
+
+    // Show recommendation popup
+    const list = document.getElementById('alerts-list');
+    const div = document.createElement('div');
+    div.style.cssText = `
+      padding: 12px; margin: 8px 0;
+      background: rgba(0,255,136,0.05);
+      border-left: 3px solid var(--accent);
+      font-size: 12px;
+    `;
+
+    // Build offenders list
+    let offendersHtml = '';
+    if (result.topOffenders && result.topOffenders.length) {
+      offendersHtml = `
+        <div style="margin-top:8px; color:var(--text-dim)">
+          Top offenders:
+          ${result.topOffenders.map(p => `
+            <span style="
+              margin-left:8px; padding:2px 8px;
+              border:1px solid var(--border);
+              color:var(--warn)">
+              ${p.name} — ${p.cpu !== undefined ? p.cpu + '% CPU' : p.memoryMB + ' MB'}
+            </span>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    div.innerHTML = `
+      <span style="color:var(--accent)">✅ RESOLVED</span>
+      <span style="margin-left:10px; color:var(--text-dim)">
+        ${result.recommendation || 'Alert acknowledged'}
+      </span>
+      ${offendersHtml}
+    `;
+
+    list.prepend(div);
+
+    // Remove after 8 seconds
+    setTimeout(() => div.remove(), 8000);
+
+    // Refresh alerts list
+    loadAlerts();
+
+  } catch(e) {
+    console.warn('Resolve failed:', e);
   }
 }
 

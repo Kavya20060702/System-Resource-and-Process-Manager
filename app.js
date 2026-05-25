@@ -3,7 +3,7 @@
 //  Connects to Spring Boot backend at :8080
 // ═══════════════════════════════════════════════
 
-const API = 'http://localhost:8080/api';
+const API = 'http://localhost:8082/api';
 
 // Process colors for Gantt chart
 const PROCESS_COLORS = [

@@ -1,141 +1,112 @@
-# 🖥️ System Resource and Process Manager (SmartOS Monitor)
+### 🖥️ SmartOS Monitor
 
-**SmartOS Monitor** is a full-stack real-time system monitoring dashboard 
-that makes Operating Systems, Computer Networks and DBMS theory visible 
-through a live web application — built entirely in Java Spring Boot 
-with a MySQL backend.
+Real-time system monitoring dashboard that brings Operating Systems, Computer Networks, and DBMS concepts to life using Java Spring Boot and MySQL.
 
----
+### ✨ Features
 
-## ✨ Features
+1. Live Dashboard
 
-* 📊 **Live System Dashboard**
-  * Real-time CPU usage with per-core breakdown
-  * RAM consumption with used, free and swap memory
-  * Disk usage per partition
-  * Network I/O with active TCP connections
+   Real-time CPU, memory, disk, and network monitoring with interactive charts.
 
-* ⚙️ **Process Manager**
-  * Lists all running processes with PID, CPU%, RAM, threads
-  * Shows process state — Running, Sleeping, Stopped, Zombie
-  * Color-coded rows for high CPU processes
+2. Process Manager
 
-* 🧠 **CPU Scheduling Simulator**
-  * Visual implementation of FCFS, SJF and Round Robin
-  * Generates Gantt chart with color-coded process blocks
-  * Calculates Average Waiting Time, Turnaround Time and CPU Utilization
-  * Demonstrates OS scheduling theory interactively
+   View running processes with PID, CPU%, RAM, threads, and process state indicators.
 
-* 🌐 **Network Analyzer**
-  * Displays hostname, IPv4 address and MAC per interface
-  * Shows active TCP established connections
-  * Open port scanner with process ID mapping
-  * Demonstrates Transport and Data Link layer concepts
+3. CPU Scheduling Simulator
 
-* 🗄️ **DBMS History Module**
-  * Auto-saves system snapshots to MySQL every 30 seconds
-  * Aggregation queries — AVG, MAX, COUNT with time filters
-  * 7-day hourly trend using native GROUP BY SQL
-  * Database indexes on timestamp for optimized queries
+   Visualize FCFS, SJF, and Round Robin algorithms with Gantt charts and performance metrics.
 
-* 🚨 **Intelligent Alert System**
-  * Detects CPU > 85% and RAM > 90% threshold breaches
-  * Logs alerts with severity (HIGH / CRITICAL) to MySQL
-  * Resolve button identifies top offending processes
-  * Shows real-time recommendation on resolution
+4. Network Analyzer
 
----
+   Inspect interfaces, MAC/IP details, active TCP connections, and open ports.
 
-## 🛠️ Tech Stack
+5. DBMS History Module
 
-### Backend
-* Java 17
-* Spring Boot 3
-* Spring Data JPA + Hibernate
-* MySQL 8
-* OSHI Library (OS & Hardware metrics)
-* Maven
+   Auto-store system snapshots in MySQL and generate aggregated trends and statistics.
 
-### Frontend
-* HTML5 + CSS3
-* Vanilla JavaScript
-* Chart.js (live graphs)
+6. Intelligent Alerts
 
-### Database
-* MySQL
-* JPA Entities with indexing
-* Native SQL + JPQL queries
+   Detect high CPU/RAM usage, log alerts with severity levels, and suggest offending processes.
 
----
+### 🛠️ Tech Stack
 
-## 🎯 Subjects Covered
+| Layer          | Technologies                                              |
+| -------------- | --------------------------------------------------------- |
+| Backend        | Java 17, Spring Boot 3, Spring Data JPA, Hibernate, Maven |
+| Frontend       | HTML5, CSS3, Vanilla JavaScript, Chart.js                 |
+| Database       | MySQL 8                                                   |
+| System Metrics | OSHI Library                                              |
 
-| Subject | Concepts Demonstrated |
-|---|---|
-| **Operating Systems** | Process management, CPU scheduling, memory management, file system |
-| **Computer Networks** | TCP/IP, transport layer, ports, sockets, HTTP, CORS |
-| **DBMS** | Schema design, indexing, aggregation, scheduled transactions |
+### 🎯 Subjects Covered
 
----
+| Subject           | Concepts Demonstrated                                                |
+| ----------------- | -------------------------------------------------------------------- |
+| Operating Systems | Process management, CPU scheduling, memory and file systems          |
+| Computer Networks | TCP/IP, ports, sockets, transport and data link layers               |
+| DBMS              | Schema design, indexing, aggregation queries, scheduled transactions |
 
-## 🏗️ Project Architecture
+### 🏗️ Architecture
 
-```text
-SmartOS Monitor
-│
-├── Backend (Spring Boot)
-│   ├── SystemMonitorService     → reads OS data using OSHI
-│   ├── SchedulerService         → FCFS, SJF, Round Robin algorithms
-│   ├── SystemController         → REST API endpoints
-│   ├── SystemSnapshot (Entity)  → MySQL table with indexes
-│   ├── Alert (Entity)           → threshold breach logs
-│   └── CorsConfig               → cross-origin HTTP configuration
-│
-├── Frontend (HTML/CSS/JS)
-│   ├── Dashboard Tab            → live metric cards + charts
-│   ├── Processes Tab            → real process manager
-│   ├── Network Tab              → interfaces + port scanner
-│   ├── CPU Scheduler Tab        → Gantt chart simulator
-│   └── History Tab              → MySQL aggregation results
-│
-└── Database (MySQL)
-    ├── system_snapshots         → periodic OS metric records
-    ├── system_alerts            → threshold breach events
-    └── process_logs             → process audit trail
-```
+### 🚀 Getting Started
 
----
+Prerequisites
 
-## 🚀 Getting Started
-
-### Prerequisites
 * Java 17+
+
 * Maven 3.8+
-* MySQL 8.0+
+
+* MySQL 8+
+
 * VS Code with Live Server extension
 
-### Database Setup
-```sql
-CREATE DATABASE smartos_db;
-```
+Database Setup
 
-### Installation
-```bash
-git clone https://github.com/your-username/smartos-monitor.git
-cd smartos-monitor
-```
+Installation
 
-### Configure Database
-Open `src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/smartos_db
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
-server.port=8082
-```
+Configure Database
 
-### Run Backend
-```bash
-mvn spring-boot:run
-```
-Backend starts at:
+Edit src/main/resources/application.properties:
+
+Run Backend
+
+Backend API: [http://localhost:8082/api/health](http://localhost:8082/api/health)
+
+Run Frontend
+
+Open Frontend/index.html using VS Code Live Server.
+
+Dashboard URL: [http://localhost:5500/Frontend/index.html](http://localhost:5500/Frontend/index.html)
+
+### 📡 API Endpoints
+
+| Method | Endpoint                 |
+| ------ | ------------------------ |
+| GET    | /api/health              |
+| GET    | /api/cpu                 |
+| GET    | /api/memory              |
+| GET    | /api/disk                |
+| GET    | /api/processes           |
+| GET    | /api/network             |
+| GET    | /api/ports               |
+| GET    | /api/alerts              |
+| PUT    | /api/alerts/{id}/resolve |
+| GET    | /api/history/stats       |
+| POST   | /api/scheduler/simulate  |
+
+### 🌟 Future Enhancements
+
+* Docker container monitoring
+
+* Email/SMS notifications
+
+* Spring Security authentication
+
+* Dark/light theme toggle
+
+* Responsive mobile UI
+
+* WebSocket-based live updates
+
+### 💡 Why This Project Stands Out
+
+Most student projects focus on a single subject. SmartOS Monitor combines Operating Systems, Computer Networks, and DBMS into one practical application — because real-world systems rely on all three working together.

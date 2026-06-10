@@ -1,4 +1,4 @@
-# 🖥️ SmartOS Monitor
+# 🖥️ System Resource and Process Manager (SmartOS Monitor)
 
 **SmartOS Monitor** is a full-stack real-time system monitoring dashboard 
 that makes Operating Systems, Computer Networks and DBMS theory visible 

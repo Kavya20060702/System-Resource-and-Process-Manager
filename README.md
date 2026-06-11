@@ -27,6 +27,11 @@ Real-time system monitoring dashboard that brings Operating Systems, Computer Ne
 6. Intelligent Alerts
 
    Detect high CPU/RAM usage, log alerts with severity levels, and suggest offending processes.
+   
+### WORKING PROTOTYPE PREVIEW
+<video src="https://github.com/user-attachments/assets/134c005e-9f3e-4a2b-92fc-fdcf2ee550ee" controls width="100%">
+  Your browser does not support the video tag.
+</video>
 
 ### 🛠️ Tech Stack
 
